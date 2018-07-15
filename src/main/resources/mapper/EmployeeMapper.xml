@@ -1,0 +1,251 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dpx.dao.EmployeeMapper">
+  <resultMap id="BaseResultMap" type="com.dpx.pojo.Employee">
+    <id column="emp_id" jdbcType="INTEGER" property="empId" />
+    <result column="d_id" jdbcType="INTEGER" property="dId" />
+    <result column="emp_name" jdbcType="VARCHAR" property="empName" />
+    <result column="emp_mail" jdbcType="VARCHAR" property="empMail" />
+    <result column="emp_grade" jdbcType="VARCHAR" property="empGrade" />
+  </resultMap>
+ <resultMap id="WithBaseResultMap" type="com.dpx.pojo.Employee">
+ <id column="emp_id" jdbcType="INTEGER" property="empId" />
+    <result column="d_id" jdbcType="INTEGER" property="dId" />
+    <result column="emp_name" jdbcType="VARCHAR" property="empName" />
+    <result column="emp_mail" jdbcType="VARCHAR" property="empMail" />
+    <result column="emp_grade" jdbcType="VARCHAR" property="empGrade" />
+    
+    <association property="department" javaType="com.dpx.pojo.Department">
+    <id column="dep_id" property="depId"/>
+    <result column="dep_name" property="depName"/>
+    </association>
+ </resultMap>
+  <sql id="Example_Where_Clause">
+    <where>
+      <foreach collection="oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Update_By_Example_Where_Clause">
+    <where>
+      <foreach collection="example.oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Base_Column_List">
+    emp_id, d_id, emp_name, emp_mail, emp_grade
+  </sql>
+  
+  <sql id="Dep_Column_List">
+    e.emp_id,e.d_id, e.emp_name, e.emp_mail, e.emp_grade,d.dep_id,d.dep_name
+  </sql>
+  <select id="selectByPrimaryKeyWithDep"  resultMap="WithBaseResultMap">
+    select 
+    <include refid="Dep_Column_List" />
+    from emp e
+    left join dep  d
+    on e.d_id=d.dep_id
+    where emp_id = #{empId,jdbcType=INTEGER}
+  </select>
+  <select id="selectByExampleWithDep"  resultMap="WithBaseResultMap">
+    select
+    <if test="distinct">
+      distinct
+    </if>
+    <include refid="Dep_Column_List" />
+    from emp e
+    left join dep  d
+    on e.d_id=d.dep_id
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null">
+      order by ${orderByClause}
+    </if>
+  </select>
+  <select id="selectByExample" parameterType="com.dpx.pojo.EmployeeExample" resultMap="BaseResultMap">
+    select
+    <if test="distinct">
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from emp
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null">
+      order by ${orderByClause}
+    </if>
+  </select>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from emp
+    where emp_id = #{empId,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    delete from emp
+    where emp_id = #{empId,jdbcType=INTEGER}
+  </delete>
+  <delete id="deleteByExample" parameterType="com.dpx.pojo.EmployeeExample">
+    delete from emp
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+  </delete>
+  <insert id="insert" parameterType="com.dpx.pojo.Employee">
+    insert into emp (emp_id, d_id, emp_name, 
+      emp_mail, emp_grade)
+    values (#{empId,jdbcType=INTEGER}, #{dId,jdbcType=INTEGER}, #{empName,jdbcType=VARCHAR}, 
+      #{empMail,jdbcType=VARCHAR}, #{empGrade,jdbcType=VARCHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="com.dpx.pojo.Employee">
+    insert into emp
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="empId != null">
+        emp_id,
+      </if>
+      <if test="dId != null">
+        d_id,
+      </if>
+      <if test="empName != null">
+        emp_name,
+      </if>
+      <if test="empMail != null">
+        emp_mail,
+      </if>
+      <if test="empGrade != null">
+        emp_grade,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="empId != null">
+        #{empId,jdbcType=INTEGER},
+      </if>
+      <if test="dId != null">
+        #{dId,jdbcType=INTEGER},
+      </if>
+      <if test="empName != null">
+        #{empName,jdbcType=VARCHAR},
+      </if>
+      <if test="empMail != null">
+        #{empMail,jdbcType=VARCHAR},
+      </if>
+      <if test="empGrade != null">
+        #{empGrade,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <select id="countByExample" parameterType="com.dpx.pojo.EmployeeExample" resultType="java.lang.Long">
+    select count(*) from emp
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+  </select>
+  <update id="updateByExampleSelective" parameterType="map">
+    update emp
+    <set>
+      <if test="record.empId != null">
+        emp_id = #{record.empId,jdbcType=INTEGER},
+      </if>
+      <if test="record.dId != null">
+        d_id = #{record.dId,jdbcType=INTEGER},
+      </if>
+      <if test="record.empName != null">
+        emp_name = #{record.empName,jdbcType=VARCHAR},
+      </if>
+      <if test="record.empMail != null">
+        emp_mail = #{record.empMail,jdbcType=VARCHAR},
+      </if>
+      <if test="record.empGrade != null">
+        emp_grade = #{record.empGrade,jdbcType=VARCHAR},
+      </if>
+    </set>
+    <if test="_parameter != null">
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExample" parameterType="map">
+    update emp
+    set emp_id = #{record.empId,jdbcType=INTEGER},
+      d_id = #{record.dId,jdbcType=INTEGER},
+      emp_name = #{record.empName,jdbcType=VARCHAR},
+      emp_mail = #{record.empMail,jdbcType=VARCHAR},
+      emp_grade = #{record.empGrade,jdbcType=VARCHAR}
+    <if test="_parameter != null">
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByPrimaryKeySelective" parameterType="com.dpx.pojo.Employee">
+    update emp
+    <set>
+      <if test="dId != null">
+        d_id = #{dId,jdbcType=INTEGER},
+      </if>
+      <if test="empName != null">
+        emp_name = #{empName,jdbcType=VARCHAR},
+      </if>
+      <if test="empMail != null">
+        emp_mail = #{empMail,jdbcType=VARCHAR},
+      </if>
+      <if test="empGrade != null">
+        emp_grade = #{empGrade,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where emp_id = #{empId,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.dpx.pojo.Employee">
+    update emp
+    set d_id = #{dId,jdbcType=INTEGER},
+      emp_name = #{empName,jdbcType=VARCHAR},
+      emp_mail = #{empMail,jdbcType=VARCHAR},
+      emp_grade = #{empGrade,jdbcType=VARCHAR}
+    where emp_id = #{empId,jdbcType=INTEGER}
+  </update>
+</mapper>
